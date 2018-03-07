@@ -2,7 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import sys
 
-def create_graph(nodes, edges, edge_weights, node_weights):
+def create_graph(nodes, edges, edge_weights, node_weights, max_capacities):
     
     if len(edges) != len(edge_weights):
         raise Exception("Input error: edges and edge-weights have to be of the same length (one to one correspondence).")
@@ -20,9 +20,14 @@ def create_graph(nodes, edges, edge_weights, node_weights):
     if len(nodes) != len(node_weights):
         raise Exception("Input error: nodes and node-weights have to be of the same length (one to one correspondence).")
 
-    
-    for node, node_weight in zip(nodes, node_weights):
+    index = 0
+    for  node, node_weight in zip(nodes, node_weights):
         G.node[node]["weight"] = node_weight
+        G.node[node]["current_capacity"] = node_weight * max_capacities[index]
+        G.node[node]["max_capacity"] =  max_capacities[index]
+        index = index + 1
+        
+
     return G
 
 

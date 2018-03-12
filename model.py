@@ -28,23 +28,26 @@ class System():
         
         #
         self.actions_dim = self.n * self.k
-        #self.states_dim = self.n_states()
+        self.states_dim = self.n_states()
         
     def get_trucks(self):
             return(self.trucks)
     
     def n_states(self):
         n_s = 1
-        possible_fractions_deliverable = [0] * self.k
+        possible_fractions_deliverable = []
         for i,truck in enumerate(self.trucks):
-               possible_fractions_deliverable[i] = possible_fractions_deliverable[i] + len(truck.fractions)
+               possible_fractions_deliverable.append(len(truck.fractions))
         
-        n_s = self.n**2 
+        #print("possible_fractions_deliverable", possible_fractions_deliverable)
+        n_s = n_s * (self.n+1)**(self.k) 
+        
         for i in range(self.k):
-            n_s = n_s * (possible_fractions_deliverable[i] + 1)
+            n_s = n_s * (possible_fractions_deliverable[i])
         
-        n_s = n_s * np.prod([len(self.tanks_level[i]) for i in range(self.n)])
-            
+        n_s = n_s * np.prod([len(self.tanks_level[i])-1 for i in range(self.n)])
+        #print([self.tanks_level[i] for i in range(self.n)])
+                       
         return(n_s)    
                
         

@@ -30,6 +30,10 @@ class System():
         self.actions_dim = self.n * self.k
         self.states_dim = self.n_states()
         
+        #
+        self.a = None
+        self.da = None
+        
     def get_trucks(self):
             return(self.trucks)
     
@@ -149,8 +153,12 @@ class System():
         if seed != None:
             random.seed(seed)
             
-        rewards = 0  
+            
+        new_positions = [] 
+        new_deliveries = []
+        new_deliveries_index = []
         
+        rewards = 0  
         print("self.trucks",self.get_trucks())
             
         # Choose a position for each truck randomly
@@ -173,6 +181,7 @@ class System():
             
             # Update rewards due to oil costs (transport/km)
             rewards = rewards - self.weights[old_position][new_position]
+            new_positions.append(new_position)
 
             
             
@@ -190,11 +199,15 @@ class System():
                 if possible_delivery_quantities.size == 0:
                     if verbose: print(f"Truck {truck.id} in tank {truck.pos} does not deliver")
                 else:
-                    delivery_quantity = np.random.choice(possible_delivery_quantities)
+                    random_index = random.randint(0,len(possible_delivery_quantities)-1)
+                    #delivery_quantity = np.random.choice(possible_delivery_quantities)
+                    delivery_quantity = possible_delivery_quantities[random_index]
                     current_tank.load = current_tank.load + delivery_quantity
                     if verbose: print(f"Truck {truck.id} in tank {truck.pos} delivers {delivery_quantity} units")
                 
                     rewards = rewards - delivery_quantity
+                    new_deliveries_index.append(random_index)
+                    new_deliveries.append(delivery_quantity)
                     
         #old_state = self.state()    
         
@@ -208,6 +221,9 @@ class System():
         if self.is_some_tank_empty():
             rewards = -np.inf
             
-        self.update_state()    
+        self.update_state()   
+        
+        self.da = [new_positions, new_deliveries_index]
+        self.a = [new_positions, new_deliveries]
 
         return(rewards)    

@@ -104,17 +104,33 @@ class System():
         self.s = self.state()
         self.ds = self.discrete_state()
         
-    def visualize(self):
+    def visualize(self, show = False):
             #s = self.state()
             index = np.arange(self.n)
-            plt.bar(index, self.tanks_max_load, color = 'black')
-            plt.bar(index, self.tank_loads(), color = 'blue' )
+            tanks_max_load = self.tanks_max_load
+            tank_loads = self.tank_loads()
+            tanks_id = self.tanks_id
+            
+            plt.bar(index, tanks_max_load, color = 'black')
+            plt.bar(index, tank_loads, color = 'blue' )
             plt.xlabel('Tank id', fontsize=10)
             plt.ylabel('Current level', fontsize=10)
-            plt.xticks(index, self.tanks_id, fontsize=10, rotation=30)
+            plt.xticks(index, tanks_id, fontsize=10, rotation=30)
             plt.title('Current tanks state')
-            plt.show()
-                
+            
+            if show:  plt.show()
+            
+            return([index, tanks_max_load, tank_loads, tanks_id])
+        
+    def visualize_step(self, args): 
+            index, tanks_max_load, tank_loads, tanks_id = args;
+            plt.bar(index, tanks_max_load, color = 'black')
+            plt.bar(index, tank_loads, color = 'blue' )
+            plt.xlabel('Tank id', fontsize=10)
+            plt.ylabel('Current level', fontsize=10)
+            plt.xticks(index, tanks_id, fontsize=10, rotation=30)
+            plt.title('Current tanks state')
+        
     
     def is_some_tank_empty(self):
         for tank in self.tanks:

@@ -28,5 +28,7 @@ class Tank():
        
     def load_to_lvl(self):
         levels = self.levels
-        lvl = np.amin(np.where(np.isin(levels,levels[ (levels >= self.load) ])))-1
+        #print(np.where(np.isin(levels,levels[ (levels >= self.load) ])))
+        lvl = max(0,  np.amin(np.where(np.isin(levels,levels[ (levels >= self.load) ])))-1)
+        #print("tank lvl", lvl)
         return(lvl)

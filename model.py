@@ -111,6 +111,15 @@ class System():
         self.s = self.state()
         self.ds = self.discrete_state()
         
+        
+        
+    def state_action_to_string(self):
+        state_str = ''.join(str(''.join(str(y) for y in x)) for x in self.ds)
+        action_str = ''.join(str(''.join(str(y) for y in x)) for x in self.da)
+        sa_str = ''.join([state_str, action_str])
+        return(sa_str)
+        
+        
     def visualize(self, show = False):
             #s = self.state()
             index = np.arange(self.n)

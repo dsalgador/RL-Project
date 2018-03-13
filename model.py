@@ -181,7 +181,7 @@ class System():
     
     def reset_trucks_positions(self):
         for truck in self.trucks:
-            truck.pos = 0
+            truck.pos = self.n
             
     def reset_trucks_loads(self):
         for truck in self.trucks:
@@ -199,7 +199,7 @@ class System():
         new_deliveries_index = []
         
         rewards = 0  
-        print("self.trucks",self.get_trucks())
+        #print("self.trucks",self.get_trucks())
             
         # Choose a position for each truck randomly
         
@@ -214,7 +214,7 @@ class System():
             possible_positions = np.where(possible_positions_index)
             #random.randint(0,len(possible_positions[0])-1)
             if verbose: print("nº of possible positions", len(possible_positions_index))
-            new_position = random.randrange(len(possible_positions_index)-1 )
+            new_position = random.randrange(len(possible_positions_index))
             if verbose: print("new position: ",new_position)
             truck.pos = new_position
             if verbose: print("possible_positions:", possible_positions)
@@ -227,27 +227,36 @@ class System():
             
         # Choose a new (possible) load delivery for each truck to the new tank (position)
         # and update the tank's load after deliverying the chosen quantity.
+        
         for current_truck in self.get_trucks():
                 truck_pos = current_truck.pos
-                if verbose: print("truck_pos: ", current_truck_pos)
-
-                #current_truck = truck
-                current_tank = self.tanks[truck_pos]
-                current_extra_tank_capacity = current_tank.tank_extra_capacity()
-                possible_delivery_quantities = current_truck.possible_delivery_quantities(current_extra_tank_capacity)
-                if verbose: print("Possible delivery quantities: ", possible_delivery_quantities)
-                if possible_delivery_quantities.size == 0:
-                    if verbose: print(f"Truck {truck.id} in tank {truck.pos} does not deliver")
-                    random_index = len(current_truck.levels)-1 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! problem dependent
-                    delivery_quantity = 0
-                else:
-                    random_index = random.randint(0,len(possible_delivery_quantities)-1)
-                    #delivery_quantity = np.random.choice(possible_delivery_quantities)
-                    delivery_quantity = possible_delivery_quantities[random_index]
-                    current_tank.load = current_tank.load + delivery_quantity
-                    if verbose: print(f"Truck {truck.id} in tank {truck.pos} delivers {delivery_quantity} units")
                 
-                    rewards = rewards - delivery_quantity
+                if truck_pos != self.n:
+                    if verbose: print("truck_pos: ", truck_pos)
+
+                    #current_truck = truck
+                    current_tank = self.tanks[truck_pos]
+                    current_extra_tank_capacity = current_tank.tank_extra_capacity()
+                    possible_delivery_quantities = current_truck.possible_delivery_quantities(current_extra_tank_capacity)
+                    if verbose: print("Possible delivery quantities: ", possible_delivery_quantities)
+                    if possible_delivery_quantities.size == 0:
+                        if verbose: print(f"Truck {truck.id} in tank {truck.pos} does not deliver")
+                        random_index = len(current_truck.levels)-1 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! problem dependent
+                        delivery_quantity = 0
+                        rewards = -np.inf
+                        
+                    else:
+                        random_index = random.randint(0,len(possible_delivery_quantities)-1)
+                        #delivery_quantity = np.random.choice(possible_delivery_quantities)
+                        delivery_quantity = possible_delivery_quantities[random_index]
+                        current_tank.load = current_tank.load + delivery_quantity
+                        if verbose: print(f"Truck {truck.id} in tank {truck.pos} delivers {delivery_quantity} units")
+
+                        rewards = rewards - delivery_quantity
+                else:
+                    delivery_quantity = 0
+                    random_index = 0 
+                    
                 new_deliveries.append(delivery_quantity)
                 new_deliveries_index.append(random_index)
     
@@ -299,13 +308,17 @@ class System():
 
             
         for new_delivery_index, truck in zip(action[self.k:], self.trucks):
-            current_tank = self.tanks[truck.pos]
-            delivery_quantity = truck.lvl_to_load(new_delivery_index)
-            truck.load = truck.load - delivery_quantity
-            
-            current_tank.load = min(current_tank.load + delivery_quantity, current_tank.max_load)
-            rewards = rewards - delivery_quantity
-            
+            if truck.pos != self.n:
+                current_tank = self.tanks[truck.pos]
+                delivery_quantity = truck.lvl_to_load(new_delivery_index)
+                truck.load = truck.load - delivery_quantity
+
+                current_tank.load = min(current_tank.load + delivery_quantity, current_tank.max_load)
+                rewards = rewards - delivery_quantity
+            else:
+                delivery_quantity = 0
+                new_delivery_index = 0 
+                
             new_deliveries_index.append(new_delivery_index)
             new_deliveries.append(delivery_quantity)
 

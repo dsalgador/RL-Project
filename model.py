@@ -85,9 +85,7 @@ class System():
     def tank_levels(self):
         return([self.tanks[i].levels for i in range(self.n)])
 
-    
         
-    
     def state(self):
         #[ positions, truck-loads, tank-loads]
         s = [self.truck_positions(), self.truck_loads(), self.tank_loads()]
@@ -157,6 +155,10 @@ class System():
     def reset_trucks_positions(self):
         for truck in self.trucks:
             truck.pos = 0
+            
+    def reset_trucks_loads(self):
+        for truck in self.trucks:
+            truck.load = truck.max_load        
         
     def random_action(self, seed = None, verbose = False):
         if seed != None:
@@ -230,9 +232,62 @@ class System():
         if self.is_some_tank_empty():
             rewards = -np.inf
             
-        self.update_state()   
+        #self.update_state()   
         
         self.da = [new_positions, new_deliveries_index]
         self.a = [new_positions, new_deliveries]
 
-        return(rewards)    
+        return(rewards)
+    
+    
+    def deterministic_action(self, action, verbose = False):
+        rewards = 0
+        
+        new_positions = [] 
+        new_deliveries = []
+        new_deliveries_index = []
+        
+        for i, new_position in enumerate(action[0:self.k]):
+            old_position = self.trucks[i].pos
+            self.trucks[i].pos = new_position
+            rewards = rewards - self.weights[old_position][new_position]
+            new_positions.append(new_position)
+
+
+            
+        for new_delivery_index, truck in zip(action[self.k:], trucks):
+            current_tank = self.tanks[truck.pos]
+            delivery_quantity = truck.lvl_to_load(new_delivery_index)
+            truck.load = truck.load - delivery_quantity
+            
+            current_tank.load = current_tank.load + delivery_quantity
+            rewards = rewards - delivery_quantity
+            
+            new_deliveries_index.append(new_delivery_index)
+            new_deliveries.append(delivery_quantity)
+
+
+        # Update the loads of the tanks accordig to their consumption rates
+        for tank in self.tanks:           
+            tank.consume()
+        
+        #new_state = self.state()
+        
+        # Penalize infinitelly if some tank is empty
+        if self.is_some_tank_empty():
+            rewards = -np.inf
+            
+        #self.update_state()   
+        
+        self.da = [new_positions, new_deliveries_index]
+        self.a = [new_positions, new_deliveries]    
+       
+        if verbose: print(self.da, self.a)
+        
+        return(rewards)
+        
+            
+            
+            
+            
+            

@@ -27,3 +27,10 @@ class Truck():
         #print("truck lvl", lvl)
         return(lvl)
     
+    def lvl_to_load(self, lvl):
+        # Warning: this could be a load different to the one the truck has, since when discretizing in levels
+        # we lose information depending on how width the partition intervals are.
+        return(self.levels[lvl])
+        
+        
+    

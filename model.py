@@ -52,7 +52,7 @@ class System():
         for i in range(self.k):
             n_s = n_s * (possible_fractions_deliverable[i])
         
-        n_s = n_s * np.prod([len(self.tanks_level[i])-1 for i in range(self.n)])
+        n_s = n_s * np.prod([len(self.tanks_level[i]) for i in range(self.n)])
         #print([self.tanks_level[i] for i in range(self.n)])
                        
         return(n_s)    

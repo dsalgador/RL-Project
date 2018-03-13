@@ -29,12 +29,18 @@ class Tank():
     def load_to_lvl(self):
         levels = self.levels
         #print(np.where(np.isin(levels,levels[ (levels >= self.load) ])))
-        lvl = max(0,  np.amin(np.where(np.isin(levels,levels[ (levels >= self.load) ])))-1)
-        #print("tank lvl", lvl)
-        return(lvl)
-     
+        lvl = np.amin(np.where(np.isin(levels,levels[ (levels >= self.load) ])))-1
+        if(lvl == -1):
+            return(0)
+        else:
+            return(lvl)
+      
     def lvl_to_load(self, lvl):
         # Warning: this could be a load different to the one the truck has, since when discretizing in levels
         # we lose information depending on how width the partition intervals are.
-        return(self.levels[lvl])
+        if lvl == -1:
+            return(0)
+        else:
+            return(self.levels[lvl])
+        
         

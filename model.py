@@ -29,7 +29,10 @@ class System():
         #
         self.actions_dim = self.n * self.k
         self.states_dim = self.n_states()
-        
+        self.state_length = 2*self.k + self.n
+        self.action_length = 2*self.k
+        self.state_action_length = self.state_length + self.action_length
+
         #
         self.a = None
         self.da = None
@@ -133,6 +136,12 @@ class System():
         state_str = ''.join(str(''.join(str(y) for y in x)) for x in self.ds)
         action_str = ''.join(str(''.join(str(y) for y in x)) for x in self.da)
         sa_str = ''.join([state_str, action_str])
+        if len(sa_str) != self.state_action_length:
+            print("da", self.da)
+            print("ds", self.ds)
+            print("sa_str", sa_str)
+            raise ValueError('sa_str of wrong length in state_action_to_string()')
+            
         return(sa_str)
         
         
@@ -179,6 +188,8 @@ class System():
             truck.load = truck.max_load        
         
     def random_action(self, seed = None, verbose = False):
+        #if does not deliver, the action state is set to -1 
+        
         if seed != None:
             random.seed(seed)
             
@@ -227,6 +238,8 @@ class System():
                 if verbose: print("Possible delivery quantities: ", possible_delivery_quantities)
                 if possible_delivery_quantities.size == 0:
                     if verbose: print(f"Truck {truck.id} in tank {truck.pos} does not deliver")
+                    random_index = len(current_truck.levels) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! problem dependent
+                    delivery_quantity = 0
                 else:
                     random_index = random.randint(0,len(possible_delivery_quantities)-1)
                     #delivery_quantity = np.random.choice(possible_delivery_quantities)
@@ -235,8 +248,9 @@ class System():
                     if verbose: print(f"Truck {truck.id} in tank {truck.pos} delivers {delivery_quantity} units")
                 
                     rewards = rewards - delivery_quantity
-                    new_deliveries_index.append(random_index)
-                    new_deliveries.append(delivery_quantity)
+                new_deliveries.append(delivery_quantity)
+                new_deliveries_index.append(random_index)
+    
                     
         #old_state = self.state()    
         
@@ -254,6 +268,10 @@ class System():
         
         self.da = [new_positions, new_deliveries_index]
         self.a = [new_positions, new_deliveries]
+        
+        if len(self.action_to_string()) != self.action_length:
+            print("ACTION WITH WRONG LENGTH")
+            
 
         return(rewards)
     
@@ -302,11 +320,14 @@ class System():
         if self.is_some_tank_empty():
             rewards = -np.inf
             
-        #self.update_state()   
+        #self.update_state()
         
         self.da = [new_positions, new_deliveries_index]
         self.a = [new_positions, new_deliveries]    
        
+        if len(self.action_to_string()) != self.action_length:
+            print("ACTION WITH WRONG LENGTH")
+            
         if verbose: print(self.da, self.a)
         
         return(rewards)

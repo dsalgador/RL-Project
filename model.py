@@ -238,7 +238,7 @@ class System():
                 if verbose: print("Possible delivery quantities: ", possible_delivery_quantities)
                 if possible_delivery_quantities.size == 0:
                     if verbose: print(f"Truck {truck.id} in tank {truck.pos} does not deliver")
-                    random_index = len(current_truck.levels) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! problem dependent
+                    random_index = len(current_truck.levels)-1 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! problem dependent
                     delivery_quantity = 0
                 else:
                     random_index = random.randint(0,len(possible_delivery_quantities)-1)
@@ -303,7 +303,7 @@ class System():
             delivery_quantity = truck.lvl_to_load(new_delivery_index)
             truck.load = truck.load - delivery_quantity
             
-            current_tank.load = current_tank.load + delivery_quantity
+            current_tank.load = min(current_tank.load + delivery_quantity, current_tank.max_load)
             rewards = rewards - delivery_quantity
             
             new_deliveries_index.append(new_delivery_index)

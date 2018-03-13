@@ -6,7 +6,7 @@ class Tank():
         self.load = current_load
         self.max_load = max_load
         self.rate = consumption_rate
-        self.levels = np.linspace(0,self.max_load, n_discrete_load_levels+1)
+        self.levels = np.linspace(0,self.max_load, n_discrete_load_levels+1)[1:]
    
     def fill(self):
         self.load = self.max_load    
@@ -18,7 +18,7 @@ class Tank():
         return(self.max_load - self.load)
        
     def is_empty(self):
-        if self.load <= 0:
+        if self.load <= self.levels[0]:
             return(True)
         else:
             return(False)

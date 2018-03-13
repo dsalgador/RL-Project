@@ -8,7 +8,7 @@ class Truck():
         self.max_load = max_load
         self.pos = current_position
         self.fractions = load_fractions_deliverable
-        self.levels = np.linspace(0,self.max_load, n_discrete_load_levels+1)
+        self.levels = np.linspace(0,self.max_load, n_discrete_load_levels+1)[1:]
      
     def fill(self):
         self.load = self.max_load

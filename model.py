@@ -104,13 +104,24 @@ class System():
             
         return(ds)    
             
-    
+    def set_discrete_state(self, d_state):
+        ds = [ [],[] ,[] ]
+
+        for i in d_state[:self.k]:
+            ds[0].append(int(i))
+        for i in d_state[self.k:(2*self.k)]:
+            ds[1].append(int(i))
+        for i in d_state[2*self.k:]:
+            ds[2].append(int(i))
+            
+        self.ds = ds  
+        
+        
     def update_state(self):
         self.s = self.state()
         self.ds = self.discrete_state()
         
-        
-        
+ 
     def state_action_to_string(self):
         state_str = ''.join(str(''.join(str(y) for y in x)) for x in self.ds)
         action_str = ''.join(str(''.join(str(y) for y in x)) for x in self.da)
@@ -242,10 +253,17 @@ class System():
     
     def deterministic_action(self, action, verbose = False):
         rewards = 0
+        def action_to_int(action):
+            int_action = []
+            for i in action:
+                int_action.append(int(i))
+            return(int_action)
         
         new_positions = [] 
         new_deliveries = []
         new_deliveries_index = []
+        
+        action = action_to_int(action)
         
         for i, new_position in enumerate(action[0:self.k]):
             old_position = self.trucks[i].pos
@@ -255,7 +273,7 @@ class System():
 
 
             
-        for new_delivery_index, truck in zip(action[self.k:], trucks):
+        for new_delivery_index, truck in zip(action[self.k:], self.trucks):
             current_tank = self.tanks[truck.pos]
             delivery_quantity = truck.lvl_to_load(new_delivery_index)
             truck.load = truck.load - delivery_quantity

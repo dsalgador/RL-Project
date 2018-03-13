@@ -24,7 +24,7 @@ class Tank():
             return(False)
        
     def consume(self):
-        self.load = self.load - self.rate
+        self.load = max(0, self.load - self.rate)
        
     def load_to_lvl(self):
         levels = self.levels

@@ -243,7 +243,7 @@ class System():
                         if verbose: print(f"Truck {truck.id} in tank {truck.pos} does not deliver")
                         random_index = len(current_truck.levels)-1 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! problem dependent
                         delivery_quantity = 0
-                        rewards = -np.inf
+                        rewards = rewards -10**3 #-np.inf
                         
                     else:
                         random_index = random.randint(0,len(possible_delivery_quantities)-1)
@@ -271,7 +271,7 @@ class System():
         
         # Penalize infinitelly if some tank is empty
         if self.is_some_tank_empty():
-            rewards = -np.inf
+            rewards = rewards - 10**3 #np.inf
             
         #self.update_state()   
         
@@ -331,7 +331,7 @@ class System():
         
         # Penalize infinitelly if some tank is empty
         if self.is_some_tank_empty():
-            rewards = -np.inf
+            rewards = - 10**3 #np.inf
             
         #self.update_state()
         

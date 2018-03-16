@@ -179,6 +179,28 @@ class System():
                 return(True)
         return(False)    
     
+    def number_of_tanks_empty(self):
+        i = 0
+        for tank in self.tanks:
+            if tank.is_empty():
+                i = i+1
+        return(i)    
+    
+    def is_some_tank_below_last_level(self):
+        for tank in self.tanks:
+            if tank.is_under_last_level():
+                return(True)
+        return(False)    
+    
+    def number_of_tanks_below_last_level(self):
+        i = 0
+        for tank in self.tanks:
+            if tank.is_below_last_level():
+                i = i+1
+        return(i)    
+    
+    
+    
     def reset_trucks_positions(self):
         for truck in self.trucks:
             truck.pos = self.n
@@ -270,8 +292,11 @@ class System():
         #new_state = self.state()
         
         # Penalize infinitelly if some tank is empty
-        if self.is_some_tank_empty():
-            rewards = rewards - 10**3 #np.inf
+        rewards = rewards - 10**4 * self.number_of_tanks_empty() #np.inf
+         
+        # Penalize if some tank is below the last level
+        rewards = rewards - 2.333*10**2 * self.number_of_tanks_below_last_level() #np.inf
+    
             
         #self.update_state()   
         
@@ -330,8 +355,11 @@ class System():
         #new_state = self.state()
         
         # Penalize infinitelly if some tank is empty
-        if self.is_some_tank_empty():
-            rewards = - 10**3 #np.inf
+        rewards = rewards - 10**4 * self.number_of_tanks_empty() #np.inf
+         
+        # Penalize if some tank is below the last level
+        rewards = rewards - 2.333*10**2 * self.number_of_tanks_below_last_level() #np.inf
+    
             
         #self.update_state()
         

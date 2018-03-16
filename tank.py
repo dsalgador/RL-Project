@@ -17,12 +17,18 @@ class Tank():
     def tank_extra_capacity(self):
         return(self.max_load - self.load)
        
-    def is_empty(self):
+    def is_below_last_level(self):
         if self.load <= self.levels[0]:
             return(True)
         else:
             return(False)
-       
+        
+    def is_empty(self):
+        if self.load <= 0:
+            return(True)
+        else:
+            return(False)
+    
     def consume(self):
         self.load = max(0, self.load - self.rate)
        

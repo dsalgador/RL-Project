@@ -210,7 +210,7 @@ class System():
             truck.load = truck.max_load        
         
     def random_action(self, seed = None, verbose = False):
-        #if does not deliver, the action state is set to -1 
+        #It is assumed that the current state of the system is updated.
         
         if seed != None:
             random.seed(seed)
@@ -311,6 +311,8 @@ class System():
     
     
     def deterministic_action(self, action, verbose = False):
+        #It is assumed that the current state of the system is updated.
+
         rewards = 0
         def action_to_int(action):
             int_action = []

@@ -11,7 +11,6 @@ import copy
 import functions as fnc
 
 COEFF = 0.0075 * 580/1000 * 11.86
-NOT_DELIVERYING_PENALTY = -1000.33
 
 C_TRANSPORT = 1.
 C_LEVELS = 1.
@@ -19,6 +18,9 @@ C_LEVELS = 1.
 p0_GLOBAL = 0.7
 P_GLOBAL = 3
 M_GLOBAL = 10
+
+NOT_DELIVERYING_PENALTY = -10**P_GLOBAL #to be equivalent/same importance as having 0 stock or surpassing max capacity levels
+
     
 class System():
     def __init__(self, tanks, trucks, adjacency_matrix, weights_matrix):
@@ -338,9 +340,7 @@ class System():
         if len(self.action_to_string()) != self.action_length:
             print("ACTION WITH WRONG LENGTH")
             
-        rewards = C_LEVELS * self.R_levels() 
-                  -C_TRANSPORT * self.R_transport(COEFF, w_t, u_t) 
-                  + trucks_not_deliverying * NOT_DELIVERYING_PENALTY
+        rewards = C_LEVELS * self.R_levels() - C_TRANSPORT * self.R_transport(COEFF, w_t, u_t) + trucks_not_deliverying * NOT_DELIVERYING_PENALTY
         
         return(rewards)
     
@@ -403,8 +403,7 @@ class System():
             
         if verbose: print(self.da, self.a)
             
-        rewards = C_LEVELS * self.R_levels() 
-                  -C_TRANSPORT * self.R_transport(COEFF, w_t, u_t) 
+        rewards = C_LEVELS * self.R_levels() - C_TRANSPORT * self.R_transport(COEFF, w_t, u_t) 
                   #+ trucks_not_deliverying * NOT_DELIVERYING_PENALTY
         
         

@@ -12,8 +12,8 @@ import functions as fnc
 
 COEFF = 0.0075 * 580/1000 * 11.86
 
-C_TRANSPORT = 1.
-C_LEVELS = 100.
+C_TRANSPORT = 0.01
+C_LEVELS = 1.
 
 p0_GLOBAL = 0.7
 P_GLOBAL = 3

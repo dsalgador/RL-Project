@@ -11,6 +11,14 @@ import copy
 import functions as fnc
 
 COEFF = 0.0075 * 580/1000 * 11.86
+NOT_DELIVERYING_PENALTY = -1000.33
+
+C_TRANSPORT = 1.
+C_LEVELS = 1.
+
+p0_GLOBAL = 0.7
+P_GLOBAL = 3
+M_GLOBAL = 10
     
 class System():
     def __init__(self, tanks, trucks, adjacency_matrix, weights_matrix):
@@ -216,7 +224,7 @@ class System():
     def R_transport(self, coeff, w, u):
         return( coeff * np.sum(w*u) )
     
-    def R_levels(self, p0 = 0.7, M = 1, P = 1): #STILL TO DECIDE THE DEFAULT VALUES 
+    def R_levels(self, p0 = p0_GLOBAL, M = M_GLOBAL, P = P_GLOBAL): #STILL TO DECIDE THE DEFAULT VALUES 
         
         R = 0
         
@@ -330,7 +338,9 @@ class System():
         if len(self.action_to_string()) != self.action_length:
             print("ACTION WITH WRONG LENGTH")
             
-        rewards = self.R_levels() -self.R_transport(COEFF, w_t, u_t)
+        rewards = C_LEVELS * self.R_levels() 
+                  -C_TRANSPORT * self.R_transport(COEFF, w_t, u_t) 
+                  + trucks_not_deliverying * NOT_DELIVERYING_PENALTY
         
         return(rewards)
     
@@ -349,16 +359,18 @@ class System():
         new_deliveries = []
         new_deliveries_index = []
         
+        w_t = np.full(self.k, 0)
+
+        
         action = action_to_int(action)
         
         for i, new_position in enumerate(action[0:self.k]):
             old_position = self.trucks[i].pos
             self.trucks[i].pos = new_position
-            rewards = rewards - self.weights[old_position][new_position]
+            w_t[i] = self.weights[old_position][new_position]
             new_positions.append(new_position)
 
-
-            
+     
         for new_delivery_index, truck in zip(action[self.k:], self.trucks):
             if truck.pos != self.n:
                 current_tank = self.tanks[truck.pos]
@@ -369,7 +381,7 @@ class System():
                 #if the current unload is about to overfill the tank, we only fill it up intil its max capacity
                 #note that this would be a bit in contradiction with the assumption that the trucks go full and return empty,
                 #but this is needed because of the discretization of the problem.
-                rewards = rewards - delivery_quantity
+                #rewards = rewards - delivery_quantity
             else:
                 delivery_quantity = 0
                 new_delivery_index = 0 
@@ -377,21 +389,11 @@ class System():
             new_deliveries_index.append(new_delivery_index)
             new_deliveries.append(delivery_quantity)
 
+        u_t = np.asarray(new_deliveries)             
 
         # Update the loads of the tanks accordig to their consumption rates
         for tank in self.tanks:           
             tank.consume()
-        
-        #new_state = self.state()
-        
-        # Penalize infinitelly if some tank is empty
-        rewards = rewards - 10**4 * self.number_of_tanks_empty() #np.inf
-         
-        # Penalize if some tank is below the last level
-        rewards = rewards - 2.333*10**2 * self.number_of_tanks_below_last_level() #np.inf
-    
-            
-        #self.update_state()
         
         self.da = [new_positions, new_deliveries_index]
         self.a = [new_positions, new_deliveries]    
@@ -400,6 +402,11 @@ class System():
             print("ACTION WITH WRONG LENGTH")
             
         if verbose: print(self.da, self.a)
+            
+        rewards = C_LEVELS * self.R_levels() 
+                  -C_TRANSPORT * self.R_transport(COEFF, w_t, u_t) 
+                  #+ trucks_not_deliverying * NOT_DELIVERYING_PENALTY
+        
         
         return(rewards)
         

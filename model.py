@@ -225,10 +225,6 @@ class System():
             
         # Choose a position for each truck randomly
         
-        #CORRE GIR EL CODIGO, PLANTEAMIENTO PARA QUE FUNCIONE
-        #possible_positions_index = np.isin(self.graph, 1)
-        #possible_positions = np.where(possible_positions_index)
-        #print("possible_positions:", possible_positions)
         for truck in self.get_trucks():
             old_position = truck.pos
             if verbose: print("truck pos: ", old_position)
@@ -264,6 +260,8 @@ class System():
                     if possible_delivery_quantities.size == 0:
                         if verbose: print(f"Truck {truck.id} in tank {truck.pos} does not deliver")
                         random_index = len(current_truck.levels)-1 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! problem dependent
+                        #alomejor habria que poner len(current_truck.levels)+1 , ya que si no esto es como poner 0 (en el caso
+                        #de solo un nivel de carga de camión) y el () + 1 añadiria la acción "no descargar nada"
                         delivery_quantity = 0
                         rewards = rewards -10**3 #-np.inf
                         
@@ -341,6 +339,9 @@ class System():
                 truck.load = truck.load - delivery_quantity
 
                 current_tank.load = min(current_tank.load + delivery_quantity, current_tank.max_load)
+                #if the current unload is about to overfill the tank, we only fill it up intil its max capacity
+                #note that this would be a bit in contradiction with the assumption that the trucks go full and return empty,
+                #but this is needed because of the discretization of the problem.
                 rewards = rewards - delivery_quantity
             else:
                 delivery_quantity = 0

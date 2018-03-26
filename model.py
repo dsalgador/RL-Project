@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 from tank import Tank
 from truck import Truck
 import copy
+
+import functions as fnc
+
+COEFF = 0.0075 * 580/1000 * 11.86
     
 class System():
     def __init__(self, tanks, trucks, adjacency_matrix, weights_matrix):
@@ -207,7 +211,35 @@ class System():
             
     def reset_trucks_loads(self):
         for truck in self.trucks:
-            truck.load = truck.max_load        
+            truck.load = truck.max_load  
+            
+    def R_transport(self, coeff, w, u):
+        return( coeff * np.sum(w*u) )
+    
+    def R_levels(self, p0 = 0.7, M = 1, P = 1): #STILL TO DECIDE THE DEFAULT VALUES 
+        
+        R = 0
+        
+        for i, tank in enumerate(self.tanks):
+            percentages = tank.level_percentages
+            b = percentages[0]
+            c = percentages[1]
+            e = percentages[2]
+            
+            a = b/10
+            f = 1-(1-e)/10
+            d = p0*e+(1-p0)*c
+            
+            C_max = tank.max_load
+            x = tank.load
+            
+            R = R + fnc.R_lvl(x, C_max, a,b,c,d,e,f,P,M)
+            
+            
+        return(R)  
+            
+            
+        
         
     def random_action(self, seed = None, verbose = False):
         #It is assumed that the current state of the system is updated.
@@ -220,12 +252,15 @@ class System():
         new_deliveries = []
         new_deliveries_index = []
         
+        w_t = np.full(self.k, 0)
+        trucks_not_deliverying = 0
+        
         rewards = 0  
         #print("self.trucks",self.get_trucks())
             
         # Choose a position for each truck randomly
         
-        for truck in self.get_trucks():
+        for i, truck in enumerate(self.get_trucks()):
             old_position = truck.pos
             if verbose: print("truck pos: ", old_position)
             possible_positions_index = np.isin(self.graph[old_position], 1)
@@ -238,7 +273,7 @@ class System():
             if verbose: print("possible_positions:", possible_positions)
             
             # Update rewards due to oil costs (transport/km)
-            rewards = rewards - self.weights[old_position][new_position]
+            w_t[i] = self.weights[old_position][new_position]
             new_positions.append(new_position)
 
             
@@ -246,7 +281,7 @@ class System():
         # Choose a new (possible) load delivery for each truck to the new tank (position)
         # and update the tank's load after deliverying the chosen quantity.
         
-        for current_truck in self.get_trucks():
+        for i, current_truck in enumerate(self.get_trucks()):
                 truck_pos = current_truck.pos
                 
                 if truck_pos != self.n:
@@ -263,7 +298,8 @@ class System():
                         #alomejor habria que poner len(current_truck.levels)+1 , ya que si no esto es como poner 0 (en el caso
                         #de solo un nivel de carga de camión) y el () + 1 añadiria la acción "no descargar nada"
                         delivery_quantity = 0
-                        rewards = rewards -10**3 #-np.inf
+                        #rewards = rewards -10**3 #-np.inf
+                        trucks_not_deliverying = trucks_not_deliverying + 1 
                         
                     else:
                         random_index = random.randint(0,len(possible_delivery_quantities)-1)
@@ -272,31 +308,21 @@ class System():
                         current_tank.load = current_tank.load + delivery_quantity
                         if verbose: print(f"Truck {truck.id} in tank {truck.pos} delivers {delivery_quantity} units")
 
-                        rewards = rewards - delivery_quantity
+                        #rewards = rewards - delivery_quantity
+                        
                 else:
                     delivery_quantity = 0
                     random_index = 0 
-                    
+                                        
                 new_deliveries.append(delivery_quantity)
                 new_deliveries_index.append(random_index)
     
-                    
-        #old_state = self.state()    
+        u_t = np.asarray(new_deliveries)             
         
         # Update the loads of the tanks accordig to their consumption rates
         for tank in self.tanks:           
             tank.consume()
         
-        #new_state = self.state()
-        
-        # Penalize infinitelly if some tank is empty
-        rewards = rewards - 10**4 * self.number_of_tanks_empty() #np.inf
-         
-        # Penalize if some tank is below the last level
-        rewards = rewards - 2.333*10**2 * self.number_of_tanks_below_last_level() #np.inf
-    
-            
-        #self.update_state()   
         
         self.da = [new_positions, new_deliveries_index]
         self.a = [new_positions, new_deliveries]
@@ -304,7 +330,8 @@ class System():
         if len(self.action_to_string()) != self.action_length:
             print("ACTION WITH WRONG LENGTH")
             
-
+        rewards = self.R_levels() -self.R_transport(COEFF, w_t, u_t)
+        
         return(rewards)
     
     

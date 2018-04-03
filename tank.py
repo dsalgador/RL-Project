@@ -9,7 +9,7 @@ class Tank():
         self.levels = np.linspace(0,self.max_load, n_discrete_load_levels+1)[1:]
         self.level_percentages = load_level_percentages
         
-        self.rate =  self.max_load * np.mean(self.level_percentages[0]+self.level_percentages[1]) #consumption_rate
+        self.rate =  self.max_load * (self.level_percentages[0]+self.level_percentages[1])/2.0 #consumption_rate
         #self.rate = consumption_rate
    
     def fill(self):

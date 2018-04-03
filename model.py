@@ -10,19 +10,21 @@ import copy
 
 import functions as fnc
 
-COEFF = 0.0075 * 580/1000 * 11.86
+import constants as ct
 
-C_TRANSPORT = 0.01
-C_LEVELS = 1.
+COEFF = ct.COEFF
 
-p0_GLOBAL = 0.7
+C_TRANSPORT = ct.C_TRANSPORT
+C_LEVELS = ct.C_LEVELS
 
-P1_GLOBAL = -10**2
-P2_GLOBAL = -10**3
+p0_GLOBAL = ct.p0_GLOBAL
 
-M_GLOBAL = 10**1
+P1_GLOBAL = ct.P1_GLOBAL
+P2_GLOBAL = ct.P2_GLOBAL
 
-NOT_DELIVERYING_PENALTY = -10**P_GLOBAL #to be equivalent/same importance as having 0 stock or surpassing max capacity levels
+M_GLOBAL = ct.M_GLOBAL
+
+NOT_DELIVERYING_PENALTY = P2_GLOBAL #to be equivalent/same importance as having 0 stock or surpassing max capacity levels
 
     
 class System():

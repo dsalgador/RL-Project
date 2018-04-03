@@ -16,8 +16,11 @@ C_TRANSPORT = 0.01
 C_LEVELS = 1.
 
 p0_GLOBAL = 0.7
-P_GLOBAL = 3
-M_GLOBAL = 10
+
+P1_GLOBAL = -10**2
+P2_GLOBAL = -10**3
+
+M_GLOBAL = 10**1
 
 NOT_DELIVERYING_PENALTY = -10**P_GLOBAL #to be equivalent/same importance as having 0 stock or surpassing max capacity levels
 
@@ -226,7 +229,7 @@ class System():
     def R_transport(self, coeff, w, u):
         return( coeff * np.sum(w*u) )
     
-    def R_levels(self, p0 = p0_GLOBAL, M = M_GLOBAL, P = P_GLOBAL): #STILL TO DECIDE THE DEFAULT VALUES 
+    def R_levels(self, p0 = p0_GLOBAL, M = M_GLOBAL, P1 = P1_GLOBAL,  P2 = P2_GLOBAL): #STILL TO DECIDE THE DEFAULT VALUES 
         
         R = 0
         
@@ -243,7 +246,7 @@ class System():
             C_max = tank.max_load
             x = tank.load
             
-            R = R + fnc.R_lvl(x, C_max, a,b,c,d,e,f,P,M)
+            R = R + fnc.R_lvl(x, C_max, a,b,c,d,e,f,P1,P2,M)
             
             
         return(R)  
